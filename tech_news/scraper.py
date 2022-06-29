@@ -2,13 +2,16 @@ import re
 from parsel import Selector
 import time
 import requests
+from tech_news.database import create_news
 
 
 # Requisito 1
 def fetch(url):
     time.sleep(1)
     try:
-        response = requests.get(url, timeout=3)
+        response = requests.get(
+            url, headers={"user-agent": "Fake user-agent"}, timeout=3
+        )
 
         if response.status_code == 200:
             return response.text
@@ -55,4 +58,20 @@ def scrape_noticia(html_content):
 
 # Requisito 5
 def get_tech_news(amount):
-    """Seu código deve vir aqui"""
+    blog_page = fetch("https://blog.betrybe.com")
+
+    link_news = scrape_novidades(blog_page)
+
+    while len(link_news) < amount:
+        next_page = scrape_next_page_link(blog_page)
+
+        blog_page = fetch(next_page)
+
+        page_news_list = scrape_novidades(blog_page)
+        link_news.extend(page_news_list)
+
+    news_list = [scrape_noticia(fetch(link)) for link in link_news[:amount]]
+
+    create_news(news_list)
+
+    return news_list
