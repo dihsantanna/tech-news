@@ -1,4 +1,6 @@
 from tech_news.database import search_news
+from tech_news.utils import date_written_in_full
+from datetime import datetime
 
 
 # Requisito 6
@@ -12,7 +14,15 @@ def search_by_title(title):
 
 # Requisito 7
 def search_by_date(date):
-    """Seu código deve vir aqui"""
+    try:
+        datetime.fromisoformat(date)
+
+        news_by_date = search_news(
+            {"timestamp": {"$regex": date_written_in_full(date)}}
+        )
+        return [(news["title"], news["url"]) for news in news_by_date]
+    except ValueError:
+        raise ValueError("Data inválida")
 
 
 # Requisito 8
