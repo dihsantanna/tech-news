@@ -1,3 +1,4 @@
+import re
 from tech_news.database import search_news
 from tech_news.utils import date_written_in_full
 from datetime import datetime
@@ -27,7 +28,9 @@ def search_by_date(date):
 
 # Requisito 8
 def search_by_tag(tag):
-    """Seu código deve vir aqui"""
+    tag_re = re.compile(tag, re.IGNORECASE)
+    news_by_tag = search_news({"tags": {"$in": [tag_re]}})
+    return [(news["title"], news["url"]) for news in news_by_tag]
 
 
 # Requisito 9
